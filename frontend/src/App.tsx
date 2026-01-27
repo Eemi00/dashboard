@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import Nav from "./components/Nav"
 import Hero from "./components/Hero"
 import ProjectCard from "./components/ProjectCard"
+import AddSite from "./components/AddSite"
 import './styles/Projects.css'
 
 interface Site {
@@ -24,6 +25,19 @@ export default function App() {
         }
     }
 
+    const deleteSite = async (url: string) => {
+        if (!window.confirm("Haluatko varmasti poistaa tämän monitorin?")) return;
+
+        try {
+            await fetch(`http://127.0.0.1:8000/sites?url=${encodeURIComponent(url)}`, {
+                method: 'DELETE',
+            })
+            fetchSites()
+        } catch (error) {
+            console.error("Virhe poistettaessa:", error)
+        }
+    }
+
     // Haetaan sivustot kun appi lataa ja sen jälkee joka 10 sekunnin välein
     useEffect(() => {
         fetchSites()
@@ -37,6 +51,8 @@ export default function App() {
             <main className="container layout-main">
                 <Hero siteCount={sites.length} />
 
+                <AddSite onSiteAdded={fetchSites} />
+
                 <section className="projects">
                     <div className="projects-header">
                         <h2 className="section-title">Aktiiviset monitorit</h2>
@@ -45,7 +61,7 @@ export default function App() {
 
                     <div className="projects-grid">
                         {sites.map((site, index) => (
-                            <ProjectCard key={index} {...site} />
+                            <ProjectCard key={index} {...site} onDelete={deleteSite} />
                         ))}
                         {sites.length === 0 && (
                             <p className="text-muted">Yhtään sivustoa ei ole lisätty.</p>

@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import time
+import json
+import os
 
 app = FastAPI()
 
@@ -19,8 +21,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+DB_FILE = "sites.json" # Luodaan json tiedosto mihin sivustojen osoitteet tallennetaan
+
+
+def load_sites():
+    # Tarkistetaan että sites.json tiedosto on olemassa tietokoneellasi
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r") as file: # Avataan tiedosto read modessa
+            return json.load(file)
+    return [] # Jos tiedostoa ei ole palautetaan tyhjä lista
+
+
+def save_sites(sites_list):
+    # Avataan sites.json write modessa
+    with open(DB_FILE, "w") as file:
+        json.dump(sites_list, file)
+
+
 # Luodaan array
-monitored_sites = []
+monitored_sites = load_sites()
+
 
 # Luodaan funktio jolla voidaan pingata sivustoja ja varmistaa että ne on OK
 async def check_site(url: str):
@@ -44,6 +64,7 @@ async def root():
     # Palautetaan viesti että API toimii
     return {"status": "API Toimii"}
 
+
 @app.get("/sites")
 async def get_sites():
     # Luodaan uusi lista
@@ -58,10 +79,26 @@ async def get_sites():
         })
     return results
 
+
 # Määritellään mitä POST add_site tekee
 @app.post("/sites")
 async def add_site(url: str):
     # Luodaan uusi sivu monitored sites arrayhyn
-    new_site = {"url": url, "status": "unknown"}
+    new_site = {"url": url}
     monitored_sites.append(new_site)
+
+    save_sites(monitored_sites)
+
     return new_site
+
+
+# Määritellään delete funktio
+@app.delete("/sites")
+async def delete_site(url: str):
+    global monitored_sites
+    # Luodaan uusi lista missä on kaikki paitsi URL mikä halutaan poistaa
+    monitored_sites = [site for site in monitored_sites if site["url"] != url]
+
+    save_sites(monitored_sites)
+
+    return {"message": "Sivusto poistettu monitoroinnista"}
