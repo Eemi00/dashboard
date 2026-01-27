@@ -1,0 +1,48 @@
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(14px);
+    background: linear-gradient(180deg, rgba(5, 6, 8, 0.9) 0%, rgba(5, 6, 8, 0.55) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(14px, 2vw, 18px) 0;
+}
+
+.nav-logo {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    gap: clamp(12px, 2vw, 18px);
+}
+
+.nav-link {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: var(--transition-strong);
+    color: var(--muted);
+}
+
+.nav-link:hover {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--panel);
+}
+
+.nav-link.active {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(120deg, rgba(143, 123, 255, 0.2), rgba(45, 226, 230, 0.15));
+    box-shadow: var(--glow);
+}

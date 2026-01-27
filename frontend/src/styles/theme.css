@@ -1,0 +1,22 @@
+:root {
+    --bg: #050608;
+    --panel: rgba(255, 255, 255, 0.04);
+    --panel-strong: rgba(255, 255, 255, 0.08);
+    --text: #f6f7fb;
+    --muted: #9aa0b5;
+    --accent: #8f7bff;
+    --accent-2: #2de2e6;
+    --glow: 0 10px 40px rgba(143, 123, 255, 0.25);
+    --radius: 16px;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.55);
+    --transition: 220ms ease;
+    --transition-strong: 320ms cubic-bezier(0.33, 1, 0.68, 1);
+    color-scheme: dark;
+}
+
+@media (max-width: 640px) {
+    :root {
+        --radius: 12px;
+    }
+}
