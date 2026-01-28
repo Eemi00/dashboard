@@ -2,12 +2,14 @@ import '../styles/ProjectCard.css'
 
 interface SiteProps {
     url: string;
+    name: string;
+    category: string;
     status: string;
     latency: number;
     onDelete: (url: string) => void;
 }
 
-export default function ProjectCard({ url, status, latency, onDelete }: SiteProps) {
+export default function ProjectCard({ url, name, category, status, latency, onDelete }: SiteProps) {
     const isUp = status === 'up';
 
     return (
@@ -18,7 +20,8 @@ export default function ProjectCard({ url, status, latency, onDelete }: SiteProp
                         <span className="status-dot"></span>
                         {isUp ? 'Online' : 'Offline'}
                     </div>
-                    <h3>{new URL(url).hostname}</h3>
+                    <h3>{name || new URL(url).hostname}</h3>
+                    <span className="category-tag">{category}</span>
                 </div>
 
                 <button className="delete-btn" onClick={() => onDelete(url)} title="Poista">

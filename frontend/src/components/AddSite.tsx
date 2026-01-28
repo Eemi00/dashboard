@@ -8,6 +8,8 @@ interface AddSiteProps {
 export default function AddSite({ onSiteAdded }: AddSiteProps) {
 
     const [url, setUrl] = useState('')
+    const [name, setName] = useState('')
+    const [category, setCategory] = useState('Yleinen')
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -16,10 +18,14 @@ export default function AddSite({ onSiteAdded }: AddSiteProps) {
 
         setLoading(true)
         try {
-            await fetch(`http://127.0.0.1:8000/sites?url=${encodeURIComponent(url)}`, {
+
+            const query = `url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`
+
+            await fetch(`http://127.0.0.1:8000/sites?${query}`, {
                 method: 'POST',
             })
             setUrl('')
+            setName('')
             onSiteAdded()
         } catch (error) {
             console.error("Virhe sivuston lisäämisessä", error)
@@ -31,7 +37,25 @@ export default function AddSite({ onSiteAdded }: AddSiteProps) {
     return (
         <div className="add-site-section">
             <form className="add-site-form" onSubmit={handleSubmit}>
-                <i className="fa-solid fa-link" style={{ marginLeft: '16px', opacity: 0.4 }}></i>
+                <input
+                    type="text"
+                    className="add-site-input"
+                    placeholder="Nimi (esim. Oma Portfolio)"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+
+                <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="add-site-input"
+                >
+                    <option value="Yleinen">Yleinen</option>
+                    <option value="Työ">Työ</option>
+                    <option value="Projekti">Projekti</option>
+                    <option value="Hupi">Hupi</option>
+                </select>
+
                 <input
                     type="url"
                     className="add-site-input"
@@ -40,13 +64,9 @@ export default function AddSite({ onSiteAdded }: AddSiteProps) {
                     onChange={(e) => setUrl(e.target.value)}
                     required
                 />
+
                 <button type="submit" className="add-site-button" disabled={loading}>
-                    {loading ? (
-                        <i className="fa-solid fa-circle-notch fa-spin"></i>
-                    ) : (
-                        <i className="fa-solid fa-plus"></i>
-                    )}
-                    <span>{loading ? 'Lisätään...' : 'Lisää monitori'}</span>
+                    {loading ? '...' : 'Lisää'}
                 </button>
             </form>
         </div>
