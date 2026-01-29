@@ -19,14 +19,23 @@
 
 .filters-bar {
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: 2rem;
-    align-items: center;
+}
+
+@media (min-width: 640px) {
+    .filters-bar {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
 }
 
 .search-wrapper {
     position: relative;
-    flex-grow: 1;
+    flex: 1;
+    width: 100%;
 }
 
 .search-wrapper i {
@@ -44,12 +53,49 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: white;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: rgba(45, 226, 230, 0.4);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .filter-select {
-    padding: 10px;
+    padding: 10px 14px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: white;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: none; /* Remove default browser styling */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 40px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: rgba(45, 226, 230, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.filter-select option {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 8px;
+}
+
+@media (min-width: 640px) {
+    .filter-select {
+        width: auto;
+        min-width: 200px;
+    }
 }

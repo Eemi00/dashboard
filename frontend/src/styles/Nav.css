@@ -12,6 +12,8 @@
     align-items: center;
     justify-content: space-between;
     padding: clamp(14px, 2vw, 18px) 0;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .nav-logo {
@@ -19,11 +21,13 @@
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    font-size: clamp(14px, 2.5vw, 16px);
 }
 
 .nav-links {
     display: flex;
-    gap: clamp(12px, 2vw, 18px);
+    gap: clamp(8px, 2vw, 18px);
+    flex-wrap: wrap;
 }
 
 .nav-link {
@@ -32,6 +36,8 @@
     border: 1px solid transparent;
     transition: var(--transition-strong);
     color: var(--muted);
+    font-size: clamp(13px, 1.8vw, 15px);
+    white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -45,4 +51,11 @@
     border-color: rgba(255, 255, 255, 0.15);
     background: linear-gradient(120deg, rgba(143, 123, 255, 0.2), rgba(45, 226, 230, 0.15));
     box-shadow: var(--glow);
+}
+
+@media (max-width: 480px) {
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+    }
 }

@@ -48,6 +48,7 @@ main {
 .container {
     width: min(1200px, 92vw);
     margin: 0 auto;
+    padding: 0 clamp(12px, 3vw, 0px);
 }
 
 .section-title {
@@ -86,4 +87,10 @@ main {
 
 .pill.ghost {
     background: transparent;
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: 94vw;
+    }
 }

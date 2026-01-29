@@ -4,13 +4,12 @@
 
 .add-site-form {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr auto; 
+    grid-template-columns: 1fr;
     gap: 12px;
     background: rgba(255, 255, 255, 0.03);
-    padding: 20px;
+    padding: 16px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    align-items: center;
 }
 
 /* Add a subtle glow when you are typing */
@@ -22,7 +21,8 @@
 
 .add-site-input:focus {
     outline: none;
-    border-color: var(--accent-1); /* Use your theme's purple/blue color */
+    border-color: var(--accent-1);
+    /* Use your theme's purple/blue color */
     background: rgba(0, 0, 0, 0.4);
 }
 
@@ -46,7 +46,8 @@
     padding: 0 24px;
     border-radius: 12px;
     background: var(--accent-2);
-    color: #050608; /* Dark text on bright background */
+    color: #050608;
+    /* Dark text on bright background */
     border: none;
     font-weight: 700;
     cursor: pointer;
@@ -80,4 +81,18 @@ select.add-site-input {
     background-repeat: no-repeat;
     background-position: right 10px center;
     padding-right: 30px;
+}
+
+@media (min-width: 640px) {
+    .add-site-form {
+        grid-template-columns: 1fr 1fr;
+        padding: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .add-site-form {
+        grid-template-columns: 1fr 1fr 2fr auto;
+        align-items: center;
+    }
 }
