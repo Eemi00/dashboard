@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+build
 dist-ssr
 *.local
 
@@ -17,8 +18,14 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+bun.lock
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+.env
+.env.local
+.env.production

@@ -4,7 +4,10 @@ import time
 import json
 import os
 import asyncio
+import uuid
 from urllib.parse import urlparse, parse_qs
+from playwright.sync_api import sync_playwright
+from concurrent.futures import ThreadPoolExecutor
 
 DB_FILE = "sites.json" # Luodaan json tiedosto mihin sivustojen osoitteet tallennetaan
 
@@ -21,6 +24,19 @@ def save_sites(sites_list):
     # Avataan sites.json write modessa
     with open(DB_FILE, "w") as file:
         json.dump(sites_list, file)
+
+
+def take_screenshot(url: str, filename: str):
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1280, "height": 720})
+            page.goto(url, timeout=5000, wait_until="domcontentloaded")
+            page.screenshot(path=f"screenshots/{filename}")
+            browser.close()
+        return True
+    except:
+        return False
 
 
 # Luodaan array
@@ -79,6 +95,7 @@ async def handle_request(client):
     query_params = parse_qs(parsed_url.query)
 
     response_body = ""
+
     status_code = "200 OK"
 
     # Haetaan sivustot
@@ -88,9 +105,11 @@ async def handle_request(client):
         for site in monitored_sites:
             status_data = await check_site(site["url"])
             results.append({
+                "id": site.get("id", ""),
                 "url": site["url"],
                 "name": site.get("name", ""),
                 "category": site.get("category", ""),
+                "screenshot": site.get("screenshot", ""),
                 "status": status_data["status"],
                 "latency": status_data["latency"]
             })
@@ -103,12 +122,29 @@ async def handle_request(client):
         category = query_params.get('category', ['Yleinen'])[0]
 
         if url:
+            # Luodaan ID
+            site_id = str(uuid.uuid4()) 
+
             new_site = {
+                "id": site_id,
                 "url": url,
                 "name": name if name else url, # Jos nimi on tyhjä näytetään url
-                "category": category
+                "category": category,
+                "screenshot": ""
             }
             monitored_sites.append(new_site)
+
+            # Luodaan tiedostonimi screenshotille aikaleiman avulla
+            screenshot_filename = f"{site_id}.png"
+
+            # Asetetaan screenshot filename heti
+            new_site["screenshot"] = screenshot_filename
+
+            # Otetaan SS sivustosta ja tallennetaan se
+            loop = asyncio.get_event_loop()
+            executor = ThreadPoolExecutor()
+            loop.run_in_executor(executor, take_screenshot, url, screenshot_filename)
+
             # Tallenttaa sites.json tiedostoon
             save_sites(monitored_sites)
 
@@ -117,19 +153,54 @@ async def handle_request(client):
 
     elif path == "/sites" and method == "DELETE":
         # Haetaan URL mikä halutaan poistaa querysta
-        url_to_delete = query_params.get('url', [''])[0].strip().strip('/')
+        id_to_delete = query_params.get('id', [''])[0]
 
-        if url_to_delete:
+        if id_to_delete:
+            # Etsitään sivusto jotta saadaan screenshot tiedostonimi
+            site_to_delete = None
+            for site in monitored_sites:
+                if site.get("id") == id_to_delete:
+                    site_to_delete = site
+                    break
+
+            # Jos sivustolla on screenshot, poistetaan se
+            if site_to_delete and site_to_delete.get("screenshot"):
+                screenshot_path = f"screenshots/{site_to_delete['screenshot']}"
+                if os.path.exists(screenshot_path):
+                    os.remove(screenshot_path) # Poistetaan kuva
+
             # Pidetään kaikki muut sivustot paitsi se mikä halutaan poistaa
             monitored_sites = [
                 site for site in monitored_sites
-                if site["url"] != url_to_delete
+                if site.get("id") != id_to_delete
             ]
 
             # Tallennetaan päivitetty lista JSONiin
             save_sites(monitored_sites)
 
             response_body = json.dumps({"message": "Sivusto poistettu"})
+
+    elif path.startswith("/screenshots/") and method == "GET":
+        # Haetaan tiedostonimi
+        filename = path.replace("/screenshots/", "")
+        filepath = f"screenshots/{filename}"
+
+        # Tarkistetaan onko tiedosto olemassa
+        if os.path.exists(filepath):
+            # Luetaan kuva
+            with open(filepath, "rb") as file:
+                image_data = file.read()
+
+            response = f"HTTP/1.1 200 OK\r\n"
+            response += f"Content-Type: image/png\r\n"
+            response += f"Access-Control-Allow-Origin: *\r\n"
+            response += f"Content-Length: {len(image_data)}\r\n\r\n"
+
+            # Lähetetään header tekstinä ja sitten kuva datana
+            await asyncio.get_event_loop().sock_sendall(client, response.encode())
+            await asyncio.get_event_loop().sock_sendall(client, image_data)
+            client.close()
+            return
 
     # Selaimet joskus lähettää "testi" pyynnön enne POST tai DELETE methodia. Siksi annetaan tyhjä vastaus
     elif method == "OPTIONS":

@@ -1,84 +1,245 @@
 .project {
     position: relative;
-    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    border-radius: var(--radius);
+    border-radius: 12px;
     background: var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: var(--transition-strong);
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .project:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px);
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: var(--glow);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.project-preview {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    overflow: hidden;
+}
+
+.project-screenshot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-screenshot-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+}
+
+.status-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+}
+
+.status-badge.status-up {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.status-down {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-up .status-dot {
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: pulse 2s infinite;
+}
+
+.status-down .status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 10px #ef4444;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.delete-btn-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+    opacity: 0;
+}
+
+.project:hover .delete-btn-overlay {
+    opacity: 1;
+}
+
+.delete-btn-overlay:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+.project-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .project-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 12px;
 }
 
-.project-title h3 {
+.project-name {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
     font-family: 'Space Grotesk', sans-serif;
+    color: white;
+    line-height: 1.3;
+    flex: 1;
 }
 
-.status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.75rem;
+.category-tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    white-space: nowrap;
 }
 
-/* The glowing dot */
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #444;
-}
-
-.status-up .status-dot {
-    background: var(--accent-2);
-    box-shadow: 0 0 12px var(--accent-2);
-}
-
-.status-down .status-dot {
-    background: #ff4d4d;
-    box-shadow: 0 0 12px #ff4d4d;
-}
-
-.delete-btn {
-    background: rgba(255, 77, 77, 0.1);
-    color: #ff4d4d;
-    border: 1px solid rgba(255, 77, 77, 0.2);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+.project-url {
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
+    gap: 8px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    word-break: break-all;
 }
 
-.delete-btn:hover {
-    background: #ff4d4d;
-    color: white;
+.project-url:hover {
+    color: var(--accent);
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateX(4px);
 }
 
-.project-meta {
+.project-url i {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.project-latency {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
+}
+
+.project-latency i {
+    color: var(--accent-2);
+    font-size: 1rem;
+}
+
+.latency-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+
+.latency-value {
+    color: var(--accent-2);
+    font-weight: 700;
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .project-preview {
+        height: 160px;
+    }
+
+    .project-content {
+        padding: 16px;
+    }
+
+    .project-name {
+        font-size: 1.1rem;
+    }
+
+    .category-tag {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+
+    .delete-btn-overlay {
+        opacity: 1;
+    }
 }

@@ -6,9 +6,11 @@ import AddSite from "./components/AddSite"
 import './styles/Projects.css'
 
 interface Site {
+    id: string;
     url: string;
     name: string;
     category: string;
+    screenshot: string;
     status: string;
     latency: number;
 }
@@ -18,6 +20,23 @@ export default function App() {
     const [sites, setSites] = useState<Site[]>([])
     const [searchTerm, setSearchTerm] = useState('')
     const [filterCategory, setFilterCategory] = useState('Kaikki')
+
+    // Haetaan sivustot kun appi lataa ja sen jälkee joka 10 sekunnin välein
+    useEffect(() => {
+        const fetchSites = async () => {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/sites")
+                const data = await response.json()
+                setSites(data)
+            } catch (error) {
+                console.error("virhe sivustojen hakemisessa:", error)
+            }
+        }
+
+        fetchSites()
+        const interval = setInterval(fetchSites, 10000)
+        return () => clearInterval(interval)
+    }, [])
 
     const fetchSites = async () => {
         try {
@@ -29,14 +48,21 @@ export default function App() {
         }
     }
 
-    const deleteSite = async (url: string) => {
+    const deleteSite = async (id: string) => {
         if (!window.confirm("Haluatko varmasti poistaa tämän monitorin?")) return;
 
         try {
-            await fetch(`http://127.0.0.1:8000/sites?url=${encodeURIComponent(url)}`, {
+            const response = await fetch(`http://127.0.0.1:8000/sites?id=${encodeURIComponent(id)}`, {
                 method: 'DELETE',
             })
-            fetchSites()
+            
+            if (response.ok) {
+                const response = await fetch("http://127.0.0.1:8000/sites")
+                const data = await response.json()
+                setSites(data)
+            } else {
+                console.error("Virhe poistettaessa:", response.status)
+            }
         } catch (error) {
             console.error("Virhe poistettaessa:", error)
         }
@@ -50,13 +76,6 @@ export default function App() {
 
         return matchesSearch && matchesCategory
     })
-
-    // Haetaan sivustot kun appi lataa ja sen jälkee joka 10 sekunnin välein
-    useEffect(() => {
-        fetchSites()
-        const interval = setInterval(fetchSites, 10000)
-        return () => clearInterval(interval)
-    }, [])
 
     return (
         <div className="layout">
@@ -98,8 +117,8 @@ export default function App() {
                     </div>
 
                     <div className="projects-grid">
-                        {filteredSites.map((site, index) => (
-                            <ProjectCard key={index} {...site} onDelete={deleteSite} />
+                        {filteredSites.map((site) => (
+                            <ProjectCard key={site.id} {...site} onDelete={deleteSite} />
                         ))}
                         {sites.length === 0 && (
                             <p className="text-muted">Yhtään sivustoa ei ole lisätty.</p>
