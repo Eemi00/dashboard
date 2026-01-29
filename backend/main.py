@@ -68,7 +68,7 @@ async def handle_request(client):
     global monitored_sites
     
     # Vastaanotetaan max 1024 byteä dataa
-    request_data = await asyncio.get_event_loop().sock_recv(client, 1024)
+    request_data = await asyncio.get_event_loop().sock_recv(client, 4096)
 
     # Muutetaan bytet stringiksi
     request_text = request_data.decode()
@@ -179,6 +179,49 @@ async def handle_request(client):
             save_sites(monitored_sites)
 
             response_body = json.dumps({"message": "Sivusto poistettu"})
+            
+    elif path.startswith("/sites/") and method == "PATCH":
+        # Haetaan sivuston ID URL:sta
+        site_id = path.replace("/sites/", "")
+        
+        # Etsitään request body
+        try:
+            # Etsitään mihin headers loppuu
+            header_end = request_text.find("\r\n\r\n")
+            if header_end == -1:
+                header_end = request_text.find("\n\n")
+            
+            if header_end != -1:
+                body_text = request_text[header_end:].strip()
+                
+                if body_text:
+                    body_data = json.loads(body_text)
+                    new_name = body_data.get("name", "")
+                    
+                    
+                    # Etsitään sivusto ja päivitetään nimi
+                    updated = False
+                    for site in monitored_sites:
+                        if site.get("id") == site_id:
+                            site["name"] = new_name
+                            updated = True
+                            break
+                    
+                    if updated:
+                        # Tallennetaan muutokset tiedostoon
+                        save_sites(monitored_sites)
+                        response_body = json.dumps({"message": "Nimi päivitetty", "success": True})
+                    else:
+                        response_body = json.dumps({"error": "Sivustoa ei löytynyt"})
+                else:
+                    response_body = json.dumps({"error": "Tyhjä body"})
+            else:
+                response_body = json.dumps({"error": "Ei löydetty bodyä"})
+                
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            response_body = json.dumps({"error": str(e)})
 
     elif path.startswith("/screenshots/") and method == "GET":
         # Haetaan tiedostonimi
@@ -213,7 +256,7 @@ async def handle_request(client):
 
     # Lisätään CORS headerit jotta react voi puhua tälle socketille
     response += "Access-Control-Allow-Origin: *\r\n"
-    response += "Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS\r\n"
+    response += "Access-Control-Allow-Methods: GET, POST, DELETE, PATCH, OPTIONS\r\n"
     response += "Access-Control-Allow-Headers: *\r\n"
 
     # Kerrotaan selaimelle paljonko tekstiä on tulossa

@@ -77,6 +77,28 @@ export default function App() {
         return matchesSearch && matchesCategory
     })
 
+    const updateSiteName = async (id: string, newName: string) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/sites/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: newName }),
+            })
+
+            if (response.ok) {
+                const response = await fetch("http://127.0.0.1:8000/sites")
+                const data = await response.json()
+                setSites(data)
+            } else {
+                console.error("Virhe päivittäessä:", response.status)
+            }
+        } catch (error) {
+            console.error("Virhe päivittäessä:", error)
+        }
+    }
+
     return (
         <div className="layout">
             <Nav />
@@ -118,7 +140,7 @@ export default function App() {
 
                     <div className="projects-grid">
                         {filteredSites.map((site) => (
-                            <ProjectCard key={site.id} {...site} onDelete={deleteSite} />
+                            <ProjectCard key={site.id} {...site} onDelete={deleteSite} onUpdate={updateSiteName} />
                         ))}
                         {sites.length === 0 && (
                             <p className="text-muted">Yhtään sivustoa ei ole lisätty.</p>

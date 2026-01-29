@@ -10,13 +10,28 @@ interface SiteProps {
     status: string;
     latency: number;
     onDelete: (url: string) => void;
+    onUpdate: (id: string, newName: string) => void;
 }
 
-export default function ProjectCard({ id, url, name, category, screenshot, status, latency, onDelete }: SiteProps) {
+export default function ProjectCard({ id, url, name, category, screenshot, status, latency, onDelete, onUpdate }: SiteProps) {
 
     const isUp = status === 'up';
 
     const [imageKey, setImageKey] = useState(0);
+    const [isEditing, setIsEditing] = useState(false)
+    const [editedName, setEditedName] = useState(name)
+
+    const handleSave = () => {
+        if (editedName.trim() !== '' && editedName !== name) {
+            onUpdate(id, editedName.trim())
+        }
+        setIsEditing(false)
+    }
+
+    const handleCancel = () => {
+        setEditedName(name)
+        setIsEditing(false)
+    }
 
     return (
         <div className="project">
@@ -50,8 +65,41 @@ export default function ProjectCard({ id, url, name, category, screenshot, statu
 
             <div className="project-content">
                 <div className="project-header">
-                    <h3 className="project-name">{name || new URL(url).hostname}</h3>
-                    <span className="category-tag">{category}</span>
+                    {isEditing ? (
+                        <div className="edit-name-container">
+                            <input
+                                type="text"
+                                value={editedName}
+                                onChange={(e) => setEditedName(e.target.value)}
+                                className="edit-name-input"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSave();
+                                    if (e.key === 'Escape') handleCancel();
+                                }}
+                            />
+                            <div className="edit-actions">
+                                <button className="edit-btn save" onClick={handleSave} title="Tallenna">
+                                    <i className="fa-solid fa-check"></i>
+                                </button>
+                                <button className="edit-btn cancel" onClick={handleCancel} title="Peruuta">
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h3 className="project-name">{name || new URL(url).hostname}</h3>
+                            <button
+                                className="edit-name-btn"
+                                onClick={() => setIsEditing(true)}
+                                title="Muokkaa nimeä"
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </button>
+                            <span className="category-tag">{category}</span>
+                        </>
+                    )}
                 </div>
 
                 <a
@@ -65,7 +113,6 @@ export default function ProjectCard({ id, url, name, category, screenshot, statu
                     {new URL(url).hostname}
                 </a>
 
-                {/* Viive info */}
                 <div className="project-latency">
                     <i className={`fa-solid ${isUp ? 'fa-bolt-lightning' : 'fa-circle-exclamation'}`}></i>
                     <span className="latency-label">Viive:</span>
