@@ -5,11 +5,14 @@ import json
 import os
 import asyncio
 import uuid
+from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 from playwright.sync_api import sync_playwright
 from concurrent.futures import ThreadPoolExecutor
 
 DB_FILE = "sites.json" # Luodaan json tiedosto mihin sivustojen osoitteet tallennetaan
+# Varmistetaan että screenshots kansio on olemassa
+Path("screenshots").mkdir(exist_ok=True)
 
 
 def load_sites():
@@ -31,16 +34,39 @@ def take_screenshot(url: str, filename: str):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page(viewport={"width": 1280, "height": 720})
-            page.goto(url, timeout=5000, wait_until="domcontentloaded")
+
+            # Odotetaan että sivu latautuu kokonaan
+            page.goto(url, timeout=10000, wait_until="networkidle")
+
+            # odotetaan vielä 2 sekunttia varmuuden vuoksi
+            page.wait_for_timeout(2000)
+
             page.screenshot(path=f"screenshots/{filename}")
             browser.close()
         return True
     except:
         return False
+    
+
+def check_screenshots(sites_list):
+    # Tarkistaa puuttuvat screenshotit ja ottaa ne uudelleen
+    for site in sites_list:
+        screenshot_filename = site.get("screenshot", "")
+
+        # Jos sivustolla pitäisi olla screenshot
+        if screenshot_filename:
+            screenshot_path = f"screenshots/{screenshot_filename}"
+
+            # Jos tiedostoa ei ole olemassa
+            if not os.path.exists(screenshot_path):
+                take_screenshot(site["url"], screenshot_filename)
 
 
 # Luodaan array
 monitored_sites = load_sites()
+
+# Tarkistetaan puuttuvat screenshotit
+check_screenshots(monitored_sites)
 
 
 # Luodaan funktio jolla voidaan pingata sivustoja ja varmistaa että ne on OK
